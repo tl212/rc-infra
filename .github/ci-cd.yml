@@ -1,0 +1,50 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    paths:
+      - 'backend/**'
+      - 'cypress/e2e/**'
+      - '**.tf'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Cypress tests
+        uses: cypress-io/github-action@v2
+        with:
+          spec: cypress/e2e/test.cy.js
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up GoogleCloud SDK
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          version: 'latest'
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+      - name: Initialize Terraform
+        run: |
+          terraform init
+          terraform apply -auto-approve
+      - name: Deploy to Google Cloud
+        run: |
+          gcloud run deploy backend --image gcr.io/${{ secrets.GCP_PROJECT_ID }}/backend --platform managed --region us-central1 --allow-unauthenticated
