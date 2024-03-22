@@ -1,0 +1,58 @@
+swagger: '2.0'
+info:
+  title: visitor-count-api
+  description: API for counting visitors using Google Cloud Datastore
+  version: "1.0.0"
+
+schemes:
+- https
+produces:
+- application/json
+x-google-backend:
+  address: https://backend-msvsj56xlq-uk.a.run.app
+paths:
+  /count:
+    get:
+      summary: Get current visitor count
+      description: Returns the current visitor count without incrementing it.
+      operationId: getCurrentVisitorCount  # Unique identifier for the GET operation
+
+      responses:
+        200:
+          description: A successful response containing the visitor count.
+          schema:
+            type: object
+            properties:
+              count:
+                type: integer
+                description: The current visitor count.
+        500:
+          description: Error occurred
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Error message.
+    post:
+      summary: Increment visitor count
+      description: Increments the visitor count and returns the new count.
+      operationId: incrementVisitorCount  # Unique identifier for the POST operation
+      
+      responses:
+        200:
+          description: A successful response containing the incremented visitor count.
+          schema:
+            type: object
+            properties:
+              count:
+                type: integer
+                description: The incremented visitor count.
+        500:
+          description: Error occurred
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Error message.
